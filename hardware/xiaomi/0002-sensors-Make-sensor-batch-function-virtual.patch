@@ -1,0 +1,26 @@
+From e6f404fece4e39b5be00a7e82632b245cd007b2c Mon Sep 17 00:00:00 2001
+From: Cosmin Tanislav <demonsingur@gmail.com>
+Date: Thu, 17 Feb 2022 01:04:37 +0200
+Subject: [PATCH 02/10] sensors: Make sensor batch function virtual
+
+Change-Id: I2de1e919234c4893b0b70390c0189cae38dbbe6c
+---
+ sensors/Sensor.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sensors/Sensor.h b/sensors/Sensor.h
+index 7923820..6643083 100644
+--- a/sensors/Sensor.h
++++ b/sensors/Sensor.h
+@@ -49,7 +49,7 @@ class Sensor {
+     virtual ~Sensor();
+ 
+     const SensorInfo& getSensorInfo() const;
+-    void batch(int32_t samplingPeriodNs);
++    virtual void batch(int32_t samplingPeriodNs);
+     virtual void activate(bool enable);
+     Result flush();
+ 
+-- 
+2.25.1
+

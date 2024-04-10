@@ -1,0 +1,61 @@
+From 4fe1ac6fb8fe97b2698d09f425627771abbd0625 Mon Sep 17 00:00:00 2001
+From: Cosmin Tanislav <demonsingur@gmail.com>
+Date: Thu, 17 Feb 2022 01:08:50 +0200
+Subject: [PATCH 06/10] sensors: Move one shot sensor out of main class
+
+Change-Id: Ib7ac0c55409f2dc7f8fb114167e9f4b2e8859223
+---
+ sensors/Sensor.cpp | 9 ++++++++-
+ sensors/Sensor.h   | 9 +++++++++
+ 2 files changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/sensors/Sensor.cpp b/sensors/Sensor.cpp
+index 446a7e9..2b8e1aa 100644
+--- a/sensors/Sensor.cpp
++++ b/sensors/Sensor.cpp
+@@ -93,7 +93,7 @@ void Sensor::activate(bool enable) {
+ Result Sensor::flush() {
+     // Only generate a flush complete event if the sensor is enabled and if the sensor is not a
+     // one-shot sensor.
+-    if (!mIsEnabled || (mSensorInfo.flags & static_cast<uint32_t>(SensorFlagBits::ONE_SHOT_MODE))) {
++    if (!mIsEnabled) {
+         return Result::BAD_VALUE;
+     }
+ 
+@@ -184,6 +184,13 @@ Result Sensor::injectEvent(const Event& event) {
+     return result;
+ }
+ 
++OneShotSensor::OneShotSensor(int32_t sensorHandle, ISensorsEventCallback* callback)
++    : Sensor(sensorHandle, callback) {
++    mSensorInfo.minDelay = -1;
++    mSensorInfo.maxDelay = 0;
++    mSensorInfo.flags |= SensorFlagBits::ONE_SHOT_MODE;
++}
++
+ }  // namespace implementation
+ }  // namespace subhal
+ }  // namespace V2_1
+diff --git a/sensors/Sensor.h b/sensors/Sensor.h
+index 7666cb4..b7cd4a5 100644
+--- a/sensors/Sensor.h
++++ b/sensors/Sensor.h
+@@ -79,6 +79,15 @@ class Sensor {
+     OperationMode mMode;
+ };
+ 
++class OneShotSensor : public Sensor {
++  public:
++    OneShotSensor(int32_t sensorHandle, ISensorsEventCallback* callback);
++
++    virtual void batch(int32_t /* samplingPeriodNs */) override {}
++
++    virtual Result flush() override { return Result::BAD_VALUE; }
++};
++
+ }  // namespace implementation
+ }  // namespace subhal
+ }  // namespace V2_1
+-- 
+2.25.1
+

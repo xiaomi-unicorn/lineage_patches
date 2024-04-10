@@ -1,0 +1,43 @@
+From 7381bc84b63f27e923a4478707f738d20e628645 Mon Sep 17 00:00:00 2001
+From: Fenglin Wu <quic_fenglinw@quicinc.com>
+Date: Thu, 23 Jun 2022 16:40:50 +0800
+Subject: [PATCH] sepolicy_vndr: update sepolicy for health HAL service
+
+Add label for QTI health AIDL HAL service and add policy for it to
+access power supply devices.
+
+Change-Id: I17d6c274e3e5fc76ca07019fe2e404c7c5171e57
+---
+ qva/vendor/common/file_contexts | 1 +
+ qva/vendor/common/hal_health.te | 7 +++++++
+ 2 files changed, 8 insertions(+)
+ create mode 100644 qva/vendor/common/hal_health.te
+
+diff --git a/qva/vendor/common/file_contexts b/qva/vendor/common/file_contexts
+index b076001cb..d0088e5a4 100644
+--- a/qva/vendor/common/file_contexts
++++ b/qva/vendor/common/file_contexts
+@@ -105,6 +105,7 @@
+ /(vendor|system/vendor)/bin/hw/vendor\.qti\.hardware\.soter@1\.0-service           u:object_r:vendor_hal_soter_qti_exec:s0
+ /vendor/bin/hw/vendor\.qti\.hardware\.vibrator@1\.[0-3]-service                    u:object_r:hal_vibrator_default_exec:s0
+ /vendor/bin/hw/vendor\.qti\.hardware\.vibrator\.service                            u:object_r:hal_vibrator_default_exec:s0
++/vendor/bin/hw/android\.hardware\.health-service\.qti                              u:object_r:hal_health_default_exec:s0
+ /(vendor|system/vendor)/bin/hw/vendor\.qti\.power\.pasrmanager\@1\.0-service       u:object_r:vendor_hal_pasrmanager_qti_exec:s0
+ /(vendor|system/vendor)/bin/hw/vendor\.qti\.memory\.pasrmanager\@1\.0-service      u:object_r:vendor_pasrmanager_memory_qti_exec:s0
+ /(vendor|system/vendor)/bin/hw/vendor\.qti\.psiclient\@1\.0-service                u:object_r:vendor_psiservice_exec:s0
+diff --git a/qva/vendor/common/hal_health.te b/qva/vendor/common/hal_health.te
+new file mode 100644
+index 000000000..13e48238a
+--- /dev/null
++++ b/qva/vendor/common/hal_health.te
+@@ -0,0 +1,7 @@
++# Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
++# SPDX-License-Identifier: BSD-3-Clause-Clear
++
++allow hal_health vendor_sysfs_battery_supply:{file lnk_file} r_file_perms;
++allow hal_health vendor_sysfs_battery_supply:dir r_dir_perms;
++allow hal_health vendor_sysfs_usb_supply:{file lnk_file} r_file_perms;
++allow hal_health vendor_sysfs_usb_supply:dir r_dir_perms;
+-- 
+2.25.1
+
