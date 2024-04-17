@@ -1,0 +1,35 @@
+From 7f1ca2eae8ace66efca12c4b47614f6b2f0915fa Mon Sep 17 00:00:00 2001
+From: Mengjun Leng <quic_mengjunl@quicinc.com>
+Date: Wed, 12 Oct 2022 10:28:16 +0800
+Subject: [PATCH] Make a few  members of DSM overridable and accessible
+
+Changes the API updateDataEnabledAndNotify as protected.
+Changes the member variable mPhone as protected.
+
+Change-Id: I48d23c2c6229d44922ba5ba9927cfa03de367a9f
+CRs-Fixed: 3310431
+---
+
+diff --git a/src/java/com/android/internal/telephony/data/DataSettingsManager.java b/src/java/com/android/internal/telephony/data/DataSettingsManager.java
+index c593f88..6347ed8 100644
+--- a/src/java/com/android/internal/telephony/data/DataSettingsManager.java
++++ b/src/java/com/android/internal/telephony/data/DataSettingsManager.java
+@@ -78,7 +78,7 @@
+     /** Event for initializing DataSettingsManager. */
+     private static final int EVENT_INITIALIZE = 11;
+ 
+-    private final Phone mPhone;
++    protected final Phone mPhone;
+     private final ContentResolver mResolver;
+     private final SettingsObserver mSettingsObserver;
+     private final String mLogTag;
+@@ -332,7 +332,8 @@
+         }
+     }
+ 
+-    private void updateDataEnabledAndNotify(@TelephonyManager.DataEnabledChangedReason int reason) {
++    protected void updateDataEnabledAndNotify(
++            @TelephonyManager.DataEnabledChangedReason int reason) {
+         updateDataEnabledAndNotify(reason, mPhone.getContext().getOpPackageName());
+     }
+ 

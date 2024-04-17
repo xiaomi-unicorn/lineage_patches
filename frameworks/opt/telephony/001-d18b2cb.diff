@@ -1,0 +1,26 @@
+From d18b2cba982f64c4098ebc063ff0caeb82f9b16a Mon Sep 17 00:00:00 2001
+From: Avinash Nalluri <quic_analluri@quicinc.com>
+Date: Mon, 24 Jan 2022 12:21:45 -0800
+Subject: [PATCH] Disable proguard for CellularNetworkServiceProvider
+
+It prevents the CellularNetworkServiceProvider class
+gets shrunk by the ProGuard so that the class methods
+are accessible at run time.
+
+Change-Id: Idb34c1dcd5ca0d449b0202bea774c68dab3b0ee8
+CRs-Fixed: 3115662
+---
+
+diff --git a/proguard.flags b/proguard.flags
+index ebc8922..e930de0 100644
+--- a/proguard.flags
++++ b/proguard.flags
+@@ -27,3 +27,8 @@
+ -keepclassmembers class * {
+ @**.UnsupportedAppUsage *;
+ }
++
++# Keep CellularNetworkServiceProvider members
++-keepclasseswithmembers class com.android.internal.telephony.CellularNetworkService$CellularNetworkServiceProvider {
++*;
++}

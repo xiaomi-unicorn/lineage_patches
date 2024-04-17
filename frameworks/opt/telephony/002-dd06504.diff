@@ -1,0 +1,62 @@
+From dd06504666b2183f8dbff45e4fbff5305ad70dae Mon Sep 17 00:00:00 2001
+From: Sneh Bansal <snehb@codeaurora.org>
+Date: Tue, 09 Mar 2021 15:51:47 +0530
+Subject: [PATCH] Add provision to override CellularNetworkService
+
+- Add a default constructor
+- Change access specifier of some members to protected
+- Make SST's registration managers accessible to its derived classes.
+
+Change-Id: Iff2d36075a79721bd71754ff37999289494bafff
+CRs-Fixed: 2838720
+---
+
+diff --git a/src/java/com/android/internal/telephony/CellularNetworkService.java b/src/java/com/android/internal/telephony/CellularNetworkService.java
+index 4253905..5f19b7f 100644
+--- a/src/java/com/android/internal/telephony/CellularNetworkService.java
++++ b/src/java/com/android/internal/telephony/CellularNetworkService.java
+@@ -109,7 +109,7 @@
+                     TelephonyManager.NETWORK_TYPE_TD_SCDMA}));
+     }
+ 
+-    private class CellularNetworkServiceProvider extends NetworkServiceProvider {
++    protected class CellularNetworkServiceProvider extends NetworkServiceProvider {
+ 
+         private final Map<Message, NetworkServiceCallback> mCallbackMap = new HashMap<>();
+ 
+@@ -117,6 +117,12 @@
+ 
+         private final Phone mPhone;
+ 
++        protected CellularNetworkServiceProvider() {
++            super(SubscriptionManager.DEFAULT_SIM_SLOT_INDEX);
++            mHandler = null;
++            mPhone = null;
++        }
++
+         CellularNetworkServiceProvider(int slotId) {
+             super(slotId);
+ 
+@@ -236,7 +242,8 @@
+             return availableServices;
+         }
+ 
+-        private NetworkRegistrationInfo getRegistrationStateFromResult(Object result, int domain) {
++        protected NetworkRegistrationInfo getRegistrationStateFromResult(Object result,
++                                                                         int domain) {
+             if (result == null) {
+                 return null;
+             }
+diff --git a/src/java/com/android/internal/telephony/ServiceStateTracker.java b/src/java/com/android/internal/telephony/ServiceStateTracker.java
+index 3ed4578..9210a21 100755
+--- a/src/java/com/android/internal/telephony/ServiceStateTracker.java
++++ b/src/java/com/android/internal/telephony/ServiceStateTracker.java
+@@ -614,7 +614,7 @@
+     private String mCurrentCarrier = null;
+ 
+     private final AccessNetworksManager mAccessNetworksManager;
+-    private final SparseArray<NetworkRegistrationManager> mRegStateManagers = new SparseArray<>();
++    protected final SparseArray<NetworkRegistrationManager> mRegStateManagers = new SparseArray<>();
+ 
+     /* Last known TAC/LAC */
+     private int mLastKnownAreaCode = CellInfo.UNAVAILABLE;

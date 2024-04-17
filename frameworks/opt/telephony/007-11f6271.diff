@@ -1,0 +1,42 @@
+From 11f62715d87ab7251d3ff064bd9adf1d30965a20 Mon Sep 17 00:00:00 2001
+From: Sneh Bansal <snehb@codeaurora.org>
+Date: Fri, 19 Jan 2018 17:18:32 +0530
+Subject: [PATCH] Enable vendor Telephony plugin: MSIM Changes
+
+MSIM Changes that are needed to enable vendor telephony framework.
+
+CRs-Fixed: 2172757
+Change-Id: I80a46de96c34d5e2a4ce952830f6beb862522de5
+---
+
+diff --git a/src/java/com/android/internal/telephony/SubscriptionController.java b/src/java/com/android/internal/telephony/SubscriptionController.java
+index ff34cbe..eb8367b 100644
+--- a/src/java/com/android/internal/telephony/SubscriptionController.java
++++ b/src/java/com/android/internal/telephony/SubscriptionController.java
+@@ -123,7 +123,7 @@
+  */
+ public class SubscriptionController extends ISub.Stub {
+     private static final String LOG_TAG = "SubscriptionController";
+-    private static final boolean DBG = false;
++    protected static final boolean DBG = false;
+     private static final boolean VDBG = Rlog.isLoggable(LOG_TAG, Log.VERBOSE);
+     private static final boolean DBG_CACHE = false;
+     private static final int DEPRECATED_SETTING = -1;
+@@ -2963,7 +2963,7 @@
+     }
+ 
+     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+-    private void broadcastDefaultDataSubIdChanged(int subId) {
++    protected void broadcastDefaultDataSubIdChanged(int subId) {
+         // Broadcast an Intent for default data sub change
+         if (DBG) logdl("[broadcastDefaultDataSubIdChanged] subId=" + subId);
+         Intent intent = new Intent(TelephonyIntents.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
+@@ -4784,7 +4784,7 @@
+     /**
+      * @hide
+      */
+-    private void setGlobalSetting(String name, int value) {
++    protected void setGlobalSetting(String name, int value) {
+         Settings.Global.putInt(mContext.getContentResolver(), name, value);
+         if (name == Settings.Global.MULTI_SIM_DATA_CALL_SUBSCRIPTION) {
+             invalidateDefaultDataSubIdCaches();
