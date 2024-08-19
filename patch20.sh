@@ -39,9 +39,9 @@ cd device/qcom/sepolicy
 git apply ../../../patches/device/qcom/sepolicy/4891f5c311d7854b4d7b8357290ed08b866240d9.patch
 cd ../../../
 
-cd device/xiaomi/sm8450-common
-git apply ../../../patches/device/xiaomi/sm8450-common/0001-fix-build.patch
-cd ../../../
+#cd device/xiaomi/sm8450-common
+#git apply ../../../patches/device/xiaomi/sm8450-common/0001-fix-build.patch
+#cd ../../../
 
 cd packages/resources/devicesettings
 git apply ../../../patches/packages/resources/devicesettings/48c190771825033f3ddb139ba721ae53b2acc4c4.patch
