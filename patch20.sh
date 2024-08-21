@@ -47,7 +47,6 @@ cd packages/resources/devicesettings
 git apply ../../../patches/packages/resources/devicesettings/48c190771825033f3ddb139ba721ae53b2acc4c4.patch
 cd ../../../
 
-
-
-
-
+cd kernel/xiaomi/sm8450
+git apply ../../../patches/kernel/xiaomi/sm8450/5508feb9255ea79d4dc206f33efbcbe3e570021e.patch
+cd ../../../
