@@ -50,3 +50,11 @@ cd ../../../
 cd kernel/xiaomi/sm8450
 git apply ../../../patches/kernel/xiaomi/sm8450/5508feb9255ea79d4dc206f33efbcbe3e570021e.patch
 cd ../../../
+
+cd packages/apps/Jelly
+git apply ../../../patches/packages/apps/Jelly/0001-Do-not-process-unsupported-links.patch
+cd ../../../
+
+
+
+
