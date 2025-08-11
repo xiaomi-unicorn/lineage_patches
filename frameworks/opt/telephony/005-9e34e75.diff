@@ -1,0 +1,106 @@
+From 9e34e75de76288987a641e054297ff6fce6abfbb Mon Sep 17 00:00:00 2001
+From: Sandeep Gutta <sangutta@codeaurora.org>
+Date: Wed, 06 Feb 2019 15:25:00 +0530
+Subject: [PATCH] Start using inject framework support
+
+- Start using inject mechanism to invoke vendor specific code.
+- Add the inject support for the classes extended in vendor space.
+
+Change-Id: I35b9761c15aebc32f48107bbe6b3bcec9a1eb670
+CRs-Fixed: 2394018
+---
+
+diff --git a/src/java/com/android/internal/telephony/PhoneFactory.java b/src/java/com/android/internal/telephony/PhoneFactory.java
+index 3361b74..ef5f9db 100644
+--- a/src/java/com/android/internal/telephony/PhoneFactory.java
++++ b/src/java/com/android/internal/telephony/PhoneFactory.java
+@@ -172,9 +172,11 @@
+                     networkModes[i] = RILConstants.PREFERRED_NETWORK_MODE;
+ 
+                     Rlog.i(LOG_TAG, "Network Mode set to " + Integer.toString(networkModes[i]));
+-                    sCommandsInterfaces[i] = new RIL(context,
+-                            RadioAccessFamily.getRafFromNetworkType(networkModes[i]),
+-                            cdmaSubscription, i);
++                    sCommandsInterfaces[i] = TelephonyComponentFactory.getInstance().inject(
++                            RIL.class.getName()).
++                            makeRIL(context,
++                                    RadioAccessFamily.getRafFromNetworkType(networkModes[i]),
++                                    cdmaSubscription, i);
+                 }
+ 
+                 if (numPhones > 0) {
+@@ -271,8 +273,11 @@
+ 
+                 for (int i = 0; i < numPhones; i++) {
+                     sTelephonyNetworkFactories[i] = new TelephonyNetworkFactory(
+-                            Looper.myLooper(), sPhones[i]);
++                            Looper.myLooper(), sPhones[i], sPhoneSwitcher);
+                 }
++                TelephonyComponentFactory.getInstance().inject(
++                        TelephonyComponentFactory.class.getName()).
++                        makeExtTelephonyClasses(context, sPhones, sCommandsInterfaces);
+             }
+         }
+     }
+@@ -299,7 +304,9 @@
+ 
+             int cdmaSubscription = CdmaSubscriptionSourceManager.getDefault(context);
+             for (int i = prevActiveModemCount; i < activeModemCount; i++) {
+-                sCommandsInterfaces[i] = new RIL(context, RadioAccessFamily.getRafFromNetworkType(
++                sCommandsInterfaces[i] = TelephonyComponentFactory.getInstance().inject(
++                        RIL.class.getName()).
++                        makeRIL(context, RadioAccessFamily.getRafFromNetworkType(
+                         RILConstants.PREFERRED_NETWORK_MODE),
+                         cdmaSubscription, i);
+                 sPhones[i] = createPhone(context, i);
+@@ -308,7 +315,7 @@
+                     sPhones[i].createImsPhone();
+                 }
+                 sTelephonyNetworkFactories[i] = new TelephonyNetworkFactory(
+-                        Looper.myLooper(), sPhones[i]);
++                        Looper.myLooper(), sPhones[i], sPhoneSwitcher);
+             }
+         }
+     }
+diff --git a/src/java/com/android/internal/telephony/TelephonyComponentFactory.java b/src/java/com/android/internal/telephony/TelephonyComponentFactory.java
+index dcbd2d5..c694999 100644
+--- a/src/java/com/android/internal/telephony/TelephonyComponentFactory.java
++++ b/src/java/com/android/internal/telephony/TelephonyComponentFactory.java
+@@ -481,6 +481,15 @@
+         return new LinkBandwidthEstimator(phone, mTelephonyFacade);
+     }
+ 
++    public RIL makeRIL(Context context, int preferredNetworkType,
++            int cdmaSubscription, Integer instanceId) {
++        return new RIL(context, preferredNetworkType, cdmaSubscription, instanceId);
++    }
++
++    public void makeExtTelephonyClasses(Context context,
++            Phone[] phones, CommandsInterface[] commandsInterfaces) {
++    }
++
+     /**
+      * Create a new data network controller instance. The instance is per-SIM. On multi-sim devices,
+      * there will be multiple {@link DataNetworkController} instances.
+diff --git a/src/java/com/android/internal/telephony/data/TelephonyNetworkFactory.java b/src/java/com/android/internal/telephony/data/TelephonyNetworkFactory.java
+index 85f0ae1..4b6352d 100644
+--- a/src/java/com/android/internal/telephony/data/TelephonyNetworkFactory.java
++++ b/src/java/com/android/internal/telephony/data/TelephonyNetworkFactory.java
+@@ -95,7 +95,7 @@
+     public final Handler mInternalHandler;
+ 
+ 
+-    public TelephonyNetworkFactory(Looper looper, Phone phone) {
++    public TelephonyNetworkFactory(Looper looper, Phone phone, PhoneSwitcher phoneSwitcher) {
+         super(looper, phone.getContext(), "TelephonyNetworkFactory[" + phone.getPhoneId()
+                 + "]", null);
+         mPhone = phone;
+@@ -107,7 +107,7 @@
+         setCapabilityFilter(makeNetworkFilter(mSubscriptionController, mPhone.getPhoneId()));
+         setScoreFilter(TELEPHONY_NETWORK_SCORE);
+ 
+-        mPhoneSwitcher = PhoneSwitcher.getInstance();
++        mPhoneSwitcher = phoneSwitcher;
+         LOG_TAG = "TelephonyNetworkFactory[" + mPhone.getPhoneId() + "]";
+ 
+         mPhoneSwitcher.registerForActivePhoneSwitch(mInternalHandler, EVENT_ACTIVE_PHONE_SWITCH,

@@ -1,0 +1,22 @@
+From 5508feb9255ea79d4dc206f33efbcbe3e570021e Mon Sep 17 00:00:00 2001
+From: kuailexs <952415538@qq.com>
+Date: Tue, 20 Aug 2024 00:25:47 +0800
+Subject: [PATCH] fix build
+
+---
+ drivers/input/touchscreen/fts_spi/fts.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/input/touchscreen/fts_spi/fts.c b/drivers/input/touchscreen/fts_spi/fts.c
+index c8e29a1ef6d9..50b7ca40d32b 100644
+--- a/drivers/input/touchscreen/fts_spi/fts.c
++++ b/drivers/input/touchscreen/fts_spi/fts.c
+@@ -2752,7 +2752,7 @@ void fts_enable_thp_onoff(int enable) {
+ 	return;
+ }
+ 
+-int fts_enable_touch_raw(bool en)
++int fts_enable_touch_raw(int en)
+ {
+ 	fts_enable_thp_onoff(en);
+ 	return 0;

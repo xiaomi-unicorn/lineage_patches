@@ -1,0 +1,25 @@
+From 395258167060762d433c15b79ca4f90a97b2c5cd Mon Sep 17 00:00:00 2001
+From: Sandeep Gutta <sangutta@codeaurora.org>
+Date: Fri, 03 Jul 2020 22:43:33 +0530
+Subject: [PATCH] Skip sending duplicate requests
+
+Code fix to avoid sending duplicate SIM ON/OFF requests
+during device power-up.
+
+Change-Id: Id7b496f09306712555e5f9f3828e739a26cb5aee
+CRs-Fixed: 2670662
+---
+
+diff --git a/src/java/com/android/internal/telephony/GsmCdmaPhone.java b/src/java/com/android/internal/telephony/GsmCdmaPhone.java
+index ff8412f..f8d35b6 100644
+--- a/src/java/com/android/internal/telephony/GsmCdmaPhone.java
++++ b/src/java/com/android/internal/telephony/GsmCdmaPhone.java
+@@ -4669,7 +4669,7 @@
+         updateUiTtyMode(ttyMode);
+     }
+ 
+-    private void reapplyUiccAppsEnablementIfNeeded(int retries) {
++    protected void reapplyUiccAppsEnablementIfNeeded(int retries) {
+         UiccSlot slot = mUiccController.getUiccSlotForPhone(mPhoneId);
+ 
+         // If no card is present or we don't have mUiccApplicationsEnabled yet, do nothing.

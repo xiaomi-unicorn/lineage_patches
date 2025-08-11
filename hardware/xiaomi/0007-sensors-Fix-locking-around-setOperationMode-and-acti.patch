@@ -1,0 +1,38 @@
+From ae334ea8a2706737212c9e00ff6279cd836af640 Mon Sep 17 00:00:00 2001
+From: Cosmin Tanislav <demonsingur@gmail.com>
+Date: Sat, 19 Feb 2022 23:34:29 +0200
+Subject: [PATCH 07/10] sensors: Fix locking around setOperationMode and
+ activate
+
+Change-Id: I9a09f45f012662c8f92fa40da3a4b9dd691a1b2c
+---
+ sensors/Sensor.cpp | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/sensors/Sensor.cpp b/sensors/Sensor.cpp
+index 2b8e1aa..dcf5b75 100644
+--- a/sensors/Sensor.cpp
++++ b/sensors/Sensor.cpp
+@@ -83,8 +83,8 @@ void Sensor::batch(int32_t samplingPeriodNs) {
+ }
+ 
+ void Sensor::activate(bool enable) {
++    std::lock_guard<std::mutex> lock(mRunMutex);
+     if (mIsEnabled != enable) {
+-        std::unique_lock<std::mutex> lock(mRunMutex);
+         mIsEnabled = enable;
+         mWaitCV.notify_all();
+     }
+@@ -158,8 +158,8 @@ std::vector<Event> Sensor::readEvents() {
+ }
+ 
+ void Sensor::setOperationMode(OperationMode mode) {
++    std::lock_guard<std::mutex> lock(mRunMutex);
+     if (mMode != mode) {
+-        std::unique_lock<std::mutex> lock(mRunMutex);
+         mMode = mode;
+         mWaitCV.notify_all();
+     }
+-- 
+2.25.1
+

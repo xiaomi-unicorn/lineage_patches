@@ -1,0 +1,25 @@
+From f46c758ba07baed14622b342b09b2df5a51a2984 Mon Sep 17 00:00:00 2001
+From: kuailexs <952415538@qq.com>
+Date: Mon, 22 Apr 2024 22:39:39 +0800
+Subject: [PATCH] fix build
+
+---
+ gps/android/2.1/service.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gps/android/2.1/service.cpp b/gps/android/2.1/service.cpp
+index 22cc0f2..7579a06 100644
+--- a/gps/android/2.1/service.cpp
++++ b/gps/android/2.1/service.cpp
+@@ -53,7 +53,7 @@ typedef const void* (*gnssAutoPowerHandler)(void);
+ void initializeGnssPowerHandler() {
+ 
+     void * handle = nullptr;
+-    const char* error = nullptr;
++    //const char* error = nullptr;
+     gnssAutoPowerHandler getter = nullptr;
+ 
+     getter = (gnssAutoPowerHandler) dlGetSymFromLib(handle, GNSS_POWER_LIBNAME,
+-- 
+2.25.1
+

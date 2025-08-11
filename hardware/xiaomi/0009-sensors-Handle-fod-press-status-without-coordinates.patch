@@ -1,0 +1,35 @@
+From 946d086e74452d4c948f8b64afe3b082291c75a5 Mon Sep 17 00:00:00 2001
+From: Arian <arian.kulmer@web.de>
+Date: Wed, 29 Mar 2023 17:38:34 +0200
+Subject: [PATCH 09/10] sensors: Handle fod press status without coordinates
+
+Also fix the error handling of sscanf which returns the
+number of matched variables on partial success.
+
+Change-Id: I785c0e3f73e89f79addcf18e1b5111e93e25e430
+---
+ sensors/Sensor.cpp | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/sensors/Sensor.cpp b/sensors/Sensor.cpp
+index 2982513..6c1c5e4 100644
+--- a/sensors/Sensor.cpp
++++ b/sensors/Sensor.cpp
+@@ -42,7 +42,13 @@ static bool readFpState(int fd, int& screenX, int& screenY) {
+     }
+ 
+     rc = sscanf(buffer, "%d,%d,%d", &screenX, &screenY, &state);
+-    if (rc < 0) {
++    if (rc == 1) {
++        // If only the first variable can be matched assume
++        // that the node only reports the state
++        state = screenX;
++        screenX = 0;
++        screenY = 0;
++    } else if (rc < 3) {
+         ALOGE("failed to parse fp state: %d", rc);
+         return false;
+     }
+-- 
+2.25.1
+

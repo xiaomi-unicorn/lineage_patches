@@ -1,0 +1,26 @@
+From 1088f413cc85c735acc652d1b69252a2c1ea2bba Mon Sep 17 00:00:00 2001
+From: Cosmin Tanislav <demonsingur@gmail.com>
+Date: Thu, 17 Feb 2022 01:04:44 +0200
+Subject: [PATCH 03/10] sensors: Make sensor run function virtual
+
+Change-Id: Ie50900903bbf4a302baff084f229c37c5c324742
+---
+ sensors/Sensor.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sensors/Sensor.h b/sensors/Sensor.h
+index 6643083..8a7153a 100644
+--- a/sensors/Sensor.h
++++ b/sensors/Sensor.h
+@@ -58,7 +58,7 @@ class Sensor {
+     Result injectEvent(const Event& event);
+ 
+   protected:
+-    void run();
++    virtual void run();
+     virtual std::vector<Event> readEvents();
+     static void startThread(Sensor* sensor);
+ 
+-- 
+2.25.1
+

@@ -1,0 +1,92 @@
+From 4891f5c311d7854b4d7b8357290ed08b866240d9 Mon Sep 17 00:00:00 2001
+From: Arian <arian.kulmer@web.de>
+Date: Sun, 4 Jun 2023 14:34:32 +0200
+Subject: [PATCH] Revert "sepolicy:qcc: switch to platform app"
+
+---
+ generic/private/file.te        |  6 +-----
+ generic/private/qcc_app.te     | 14 +++++++++-----
+ generic/private/seapp_contexts |  6 +-----
+ 3 files changed, 11 insertions(+), 15 deletions(-)
+
+diff --git a/generic/private/file.te b/generic/private/file.te
+index 79a0416e..c9db4fcf 100644
+--- a/generic/private/file.te
++++ b/generic/private/file.te
+@@ -24,16 +24,12 @@
+ # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+ # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-#
+-# Changes from Qualcomm Innovation Center are provided under the following license:
+-# Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+-# SPDX-License-Identifier: BSD-3-Clause-Clear
+ 
+ type vendor_seemp_data_file, core_data_file_type, data_file_type, file_type;
+ type vendor_dpmd_socket, file_type, coredomain_socket;
+ type vendor_dpmd_data_file, file_type, data_file_type, core_data_file_type;
+ type vendor_dpmwrapper_socket, file_type, coredomain_socket, mlstrustedobject;
+-type vendor_qcc_data_file, file_type, data_file_type, core_data_file_type, mlstrustedobject;
++type vendor_qcc_data_file, file_type, data_file_type, core_data_file_type;
+ type vendor_qcc_app_socket, file_type, mlstrustedobject, coredomain_socket;
+ type vendor_sys_sxrauxd_data_file, file_type, data_file_type, core_data_file_type;
+ type vendor_sys_sxrauxd_socket, file_type, coredomain_socket;
+diff --git a/generic/private/qcc_app.te b/generic/private/qcc_app.te
+index 014400ce..9bca53a0 100644
+--- a/generic/private/qcc_app.te
++++ b/generic/private/qcc_app.te
+@@ -30,10 +30,11 @@
+ # Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ # SPDX-License-Identifier: BSD-3-Clause-Clear
+ 
++typeattribute vendor_qcc_app mlstrustedsubject;
++
+ app_domain(vendor_qcc_app)
+ net_domain(vendor_qcc_app)
+ binder_use(vendor_qcc_app)
+-hal_client_domain(vendor_qcc_app, vendor_qccsyshal);
+ 
+ allow vendor_qcc_app radio_service:service_manager find;
+ # for vendor_perf_service
+@@ -49,10 +50,13 @@ unix_socket_connect(vendor_qcc_app, vendor_dpmtcm, vendor_tcmd)
+ # allow access to mediadrmserver for qdmastats/wvstats
+ allow vendor_qcc_app mediadrmserver_service:service_manager find;
+ 
+-# allow vendor_qcc_app to access app_data_file
+-# necessary for read and write /data/user_de/0/data subdirectory.
+-allow vendor_qcc_app app_data_file:dir create_dir_perms;
+-allow vendor_qcc_app app_data_file:file create_file_perms;
++# allow vendor_qcc_app to access system_app_data_file
++# necessary for read and write /data/user_de/0/com.---.qti.qdma subdirectory.
++allow vendor_qcc_app system_data_file:dir search;
++allow vendor_qcc_app system_app_data_file:dir create_dir_perms;
++allow vendor_qcc_app system_app_data_file:file create_file_perms;
++
++allow vendor_qcc_app user_profile_root_file:dir search;
+ 
+ # allow cgroup access
+ allow vendor_qcc_app cgroup:file rw_file_perms;
+diff --git a/generic/private/seapp_contexts b/generic/private/seapp_contexts
+index bdb1f72c..9132b4ef 100644
+--- a/generic/private/seapp_contexts
++++ b/generic/private/seapp_contexts
+@@ -24,10 +24,6 @@
+ # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+ # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-#
+-# Changes from Qualcomm Innovation Center are provided under the following license:
+-# Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+-# SPDX-License-Identifier: BSD-3-Clause-Clear
+ 
+ #Add new domain for DataServices
+ # Needed for CNEService , uceShimService and other connectivity services
+@@ -51,7 +47,7 @@ user=_app seinfo=platform name=com.qualcomm.wfd.service:wfd_service domain=vendo
+ user=_app seinfo=platform name=com.qualcomm.wfd.client domain=vendor_wfd_app type=app_data_file levelfrom=all
+ 
+ #Add new domain for QCC
+-user=_app seinfo=platform name=com.qti.qcc domain=vendor_qcc_app type=app_data_file levelFrom=all
++user=system seinfo=platform name=com.qti.qcc isPrivApp=true domain=vendor_qcc_app type=system_app_data_file
+ #Add new domain for QCCLMTP
+ user=system seinfo=platform name=com.qualcomm.qti.qcclmtp isPrivApp=true domain=vendor_qcc_lmtp_app type=system_app_data_file
+ #Add new domain for QCCNetstat

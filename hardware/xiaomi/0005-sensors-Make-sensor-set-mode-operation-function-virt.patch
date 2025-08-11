@@ -1,0 +1,27 @@
+From 012799cb2f69ca2e8a8a6e34b3b191c653da1ae6 Mon Sep 17 00:00:00 2001
+From: Cosmin Tanislav <demonsingur@gmail.com>
+Date: Sun, 20 Feb 2022 00:51:21 +0200
+Subject: [PATCH 05/10] sensors: Make sensor set mode operation function
+ virtual
+
+Change-Id: I62c94a6ad250417162cfc9eaca8cb490ce650d9c
+---
+ sensors/Sensor.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sensors/Sensor.h b/sensors/Sensor.h
+index 3c508c5..7666cb4 100644
+--- a/sensors/Sensor.h
++++ b/sensors/Sensor.h
+@@ -53,7 +53,7 @@ class Sensor {
+     virtual void activate(bool enable);
+     virtual Result flush();
+ 
+-    void setOperationMode(OperationMode mode);
++    virtual void setOperationMode(OperationMode mode);
+     bool supportsDataInjection() const;
+     Result injectEvent(const Event& event);
+ 
+-- 
+2.25.1
+

@@ -1,0 +1,39 @@
+From c73da56d5ceb5e23d723387c96cd331fd9de11d6 Mon Sep 17 00:00:00 2001
+From: Mengjun Leng <quic_mengjunl@quicinc.com>
+Date: Thu, 17 Nov 2022 16:20:34 +0800
+Subject: [PATCH] Reset data activity after traffic status poll stops
+
+After default route moves to other network, the data activity is still
+kept as a stale state. Once there is any active link, the stale state is
+propagated to upper layer.
+
+Change-Id: I75879d53a94a548c7b87a8516014672935a01704
+CRs-Fixed: 3339456
+---
+
+diff --git a/src/java/com/android/internal/telephony/data/LinkBandwidthEstimator.java b/src/java/com/android/internal/telephony/data/LinkBandwidthEstimator.java
+index c225b3f..f5ba0d9 100644
+--- a/src/java/com/android/internal/telephony/data/LinkBandwidthEstimator.java
++++ b/src/java/com/android/internal/telephony/data/LinkBandwidthEstimator.java
+@@ -441,6 +441,7 @@
+             return;
+         }
+         mIsOnDefaultRoute = isOnDefaultRoute;
++        logd("mIsOnDefaultRoute " + mIsOnDefaultRoute);
+         handleTrafficStatsPollConditionChanged();
+     }
+ 
+@@ -465,6 +466,13 @@
+         if (mScreenOn && mIsOnDefaultRoute && mIsOnActiveData) {
+             updateDataRatCellIdentityBandwidth();
+             handleTrafficStatsPoll();
++        } else {
++            logd("Traffic status poll stopped");
++            if (mDataActivity != TelephonyManager.DATA_ACTIVITY_NONE) {
++                mDataActivity = TelephonyManager.DATA_ACTIVITY_NONE;
++                mLinkBandwidthEstimatorCallbacks.forEach(callback -> callback.invokeFromExecutor(
++                        () -> callback.onDataActivityChanged(mDataActivity)));
++            }
+         }
+     }
+ 

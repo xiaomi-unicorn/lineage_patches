@@ -1,0 +1,31 @@
+From ff3a4c984aa18fac7b39943df3810dbd098053db Mon Sep 17 00:00:00 2001
+From: kuailexs <952415538@qq.com>
+Date: Mon, 22 Apr 2024 22:46:33 +0800
+Subject: [PATCH] dolby framework compatibility
+
+Change-Id: I0c8857fa461fb3c0921d14a1f66c6a94aeffb716
+---
+ vintf/xiaomi_framework_compatibility_matrix.xml | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/vintf/xiaomi_framework_compatibility_matrix.xml b/vintf/xiaomi_framework_compatibility_matrix.xml
+index cfc666b..c11acac 100644
+--- a/vintf/xiaomi_framework_compatibility_matrix.xml
++++ b/vintf/xiaomi_framework_compatibility_matrix.xml
+@@ -100,4 +100,13 @@
+             <instance>default</instance>
+         </interface>
+     </hal>
++    <hal format="hidl">
++        <name>vendor.dolby.hardware.dms</name>
++        <transport>hwbinder</transport>
++        <version>2.0</version>
++        <interface>
++            <name>IDms</name>
++            <instance>default</instance>
++        </interface>
++    </hal>
+ </compatibility-matrix>
+-- 
+2.25.1
+
