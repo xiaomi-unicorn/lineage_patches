@@ -1,0 +1,38 @@
+From cc113d7ceeea056cdf9017631c49d15761331746 Mon Sep 17 00:00:00 2001
+From: Luofan Chen <clfbbn@gmail.com>
+Date: Thu, 4 Jul 2024 17:24:02 +0000
+Subject: [PATCH] sepolicy_vndr: Label proc firmware config node
+
+Change-Id: Icbb7fdf23e4a76c542a15693feb46bec99ac8df8
+---
+ generic/vendor/common/file.te        | 1 +
+ generic/vendor/common/genfs_contexts | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/generic/vendor/common/file.te b/generic/vendor/common/file.te
+index 75eaf0a1..10d5ed38 100644
+--- a/generic/vendor/common/file.te
++++ b/generic/vendor/common/file.te
+@@ -121,6 +121,7 @@ type vendor_sysfs_haptics, fs_type, sysfs_type;
+ type vendor_proc_wifi_dbg, fs_type, proc_type;
+ type vendor_proc_audiod, fs_type, proc_type;
+ type vendor_proc_shs, fs_type, proc_type;
++type vendor_proc_firmware_cfg, fs_type, proc_type;
+ 
+ type vendor_qmuxd_socket, file_type;
+ type vendor_rild_socket, file_type;
+diff --git a/generic/vendor/common/genfs_contexts b/generic/vendor/common/genfs_contexts
+index 3654c726..a4f95d16 100644
+--- a/generic/vendor/common/genfs_contexts
++++ b/generic/vendor/common/genfs_contexts
+@@ -63,6 +63,7 @@ genfscon proc /debug/fwdump                           u:object_r:vendor_proc_wif
+ genfscon proc /debugdriver/driverdump                 u:object_r:vendor_proc_wifi_dbg:s0
+ genfscon proc /ath_pktlog/cld                         u:object_r:vendor_proc_wifi_dbg:s0
+ genfscon proc /shs                                    u:object_r:vendor_proc_shs:s0
++genfscon proc /sys/kernel/firmware_config             u:object_r:vendor_proc_firmware_cfg:s0
+ 
+ genfscon sysfs /android_touch                         u:object_r:vendor_sysfs_touch:s0
+ genfscon sysfs /devices/virtual/input/ftm4_touch      u:object_r:vendor_sysfs_touch:s0
+-- 
+2.25.1
+

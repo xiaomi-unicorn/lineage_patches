@@ -1,0 +1,53 @@
+From 55b7558c797669c65e78999ed981853f7a160d6e Mon Sep 17 00:00:00 2001
+From: Cosmin Tanislav <demonsingur@gmail.com>
+Date: Wed, 21 Sep 2022 10:09:08 +0530
+Subject: [PATCH] sensors: Implement double tap sensor
+
+Change-Id: I6c217c994d6e4d5ae062a31a44fffc9f097a7f6f
+---
+ sensors/v2/Sensor.h          | 11 +++++++++++
+ sensors/v2/SensorsSubHal.cpp |  6 +++++-
+ 2 files changed, 16 insertions(+), 1 deletion(-)
+
+diff --git a/sensors/v2/Sensor.h b/sensors/v2/Sensor.h
+index 522d194..290d2d9 100644
+--- a/sensors/v2/Sensor.h
++++ b/sensors/v2/Sensor.h
+@@ -121,6 +121,17 @@ class SysfsPollingOneShotSensor : public OneShotSensor {
+     int mPollFd;
+ };
+ 
++class DoubleTapSensor : public SysfsPollingOneShotSensor {
++  public:
++    DoubleTapSensor(int32_t sensorHandle, ISensorsEventCallback* callback)
++        : SysfsPollingOneShotSensor(
++                  sensorHandle, callback, "/sys/class/touch/touch_dev/gesture_double_tap_state",
++                  "/sys/class/touch/touch_dev/gesture_double_tap_enabled", "Double Tap Sensor",
++                  "org.lineageos.sensor.double_tap",
++                  static_cast<SensorType>(static_cast<int32_t>(SensorType::DEVICE_PRIVATE_BASE) +
++                                          1)) {}
++};
++
+ }  // namespace implementation
+ }  // namespace subhal
+ }  // namespace V2_1
+diff --git a/sensors/v2/SensorsSubHal.cpp b/sensors/v2/SensorsSubHal.cpp
+index 6cbcb56..6d51ea7 100644
+--- a/sensors/v2/SensorsSubHal.cpp
++++ b/sensors/v2/SensorsSubHal.cpp
+@@ -32,7 +32,11 @@ namespace implementation {
+ using ::android::hardware::Void;
+ using ::android::hardware::sensors::V2_0::implementation::ScopedWakelock;
+ 
+-SensorsSubHal::SensorsSubHal() : mCallback(nullptr), mNextHandle(1) {}
++SensorsSubHal::SensorsSubHal() : mCallback(nullptr), mNextHandle(1) {
++    if (property_get_bool("ro.vendor.sensors.xiaomi.double_tap", false)) {
++        AddSensor<DoubleTapSensor>();
++    }
++}
+ 
+ Return<void> SensorsSubHal::getSensorsList_2_1(ISensors::getSensorsList_2_1_cb _hidl_cb) {
+     std::vector<SensorInfo> sensors;
+-- 
+2.25.1
+

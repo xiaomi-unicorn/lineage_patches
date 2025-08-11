@@ -1,0 +1,50 @@
+From b5ae2b09f294483c91e5320b272afdb16044287b Mon Sep 17 00:00:00 2001
+From: Arian <arian.kulmer@web.de>
+Date: Fri, 31 May 2024 02:05:57 +0200
+Subject: [PATCH] sensors: Implement single tap sensor
+
+Change-Id: I838121ffc627fb8091ce16e0ec4499f5f44bc446
+---
+ sensors/v2/Sensor.h          | 11 +++++++++++
+ sensors/v2/SensorsSubHal.cpp |  3 +++
+ 2 files changed, 14 insertions(+)
+
+diff --git a/sensors/v2/Sensor.h b/sensors/v2/Sensor.h
+index 290d2d9..869f14a 100644
+--- a/sensors/v2/Sensor.h
++++ b/sensors/v2/Sensor.h
+@@ -132,6 +132,17 @@ class DoubleTapSensor : public SysfsPollingOneShotSensor {
+                                           1)) {}
+ };
+ 
++class SingleTapSensor : public SysfsPollingOneShotSensor {
++  public:
++    SingleTapSensor(int32_t sensorHandle, ISensorsEventCallback* callback)
++        : SysfsPollingOneShotSensor(
++                  sensorHandle, callback, "/sys/class/touch/touch_dev/gesture_single_tap_state",
++                  "/sys/class/touch/touch_dev/gesture_single_tap_enabled", "Single Tap Sensor",
++                  "org.lineageos.sensor.single_tap",
++                  static_cast<SensorType>(static_cast<int32_t>(SensorType::DEVICE_PRIVATE_BASE) +
++                                          2)) {}
++};
++
+ }  // namespace implementation
+ }  // namespace subhal
+ }  // namespace V2_1
+diff --git a/sensors/v2/SensorsSubHal.cpp b/sensors/v2/SensorsSubHal.cpp
+index 6d51ea7..bb125b5 100644
+--- a/sensors/v2/SensorsSubHal.cpp
++++ b/sensors/v2/SensorsSubHal.cpp
+@@ -36,6 +36,9 @@ SensorsSubHal::SensorsSubHal() : mCallback(nullptr), mNextHandle(1) {
+     if (property_get_bool("ro.vendor.sensors.xiaomi.double_tap", false)) {
+         AddSensor<DoubleTapSensor>();
+     }
++    if (property_get_bool("ro.vendor.sensors.xiaomi.single_tap", false)) {
++        AddSensor<SingleTapSensor>();
++    }
+ }
+ 
+ Return<void> SensorsSubHal::getSensorsList_2_1(ISensors::getSensorsList_2_1_cb _hidl_cb) {
+-- 
+2.25.1
+

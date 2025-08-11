@@ -1,0 +1,50 @@
+From 0fb685b7684e08038c46ec328f01e22e92c31f27 Mon Sep 17 00:00:00 2001
+From: Arian <arian.kulmer@web.de>
+Date: Tue, 21 May 2024 12:57:47 +0200
+Subject: [PATCH] sensors: Let the reading of poll fd be configurable
+
+Change-Id: I554a238c11a87d89687b60d3f39446c8f2ff7e2a
+---
+ sensors/v2/Sensor.cpp | 6 +++++-
+ sensors/v2/Sensor.h   | 1 +
+ 2 files changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/sensors/v2/Sensor.cpp b/sensors/v2/Sensor.cpp
+index e96ef21..ed3ff71 100644
+--- a/sensors/v2/Sensor.cpp
++++ b/sensors/v2/Sensor.cpp
+@@ -324,7 +324,7 @@ void SysfsPollingOneShotSensor::run() {
+                 continue;
+             }
+ 
+-            if (mPolls[1].revents == mPolls[1].events && readBool(mPollFd, true /* seek */)) {
++            if (mPolls[1].revents == mPolls[1].events && readFd(mPollFd)) {
+                 activate(false, false, false);
+                 mCallback->postEvents(readEvents(), isWakeUpSensor());
+             } else if (mPolls[0].revents == mPolls[0].events) {
+@@ -357,6 +357,10 @@ void SysfsPollingOneShotSensor::fillEventData(Event& event) {
+     event.u.data[1] = 0;
+ }
+ 
++bool SysfsPollingOneShotSensor::readFd(const int fd) {
++    return readBool(fd, true /* seek */);
++}
++
+ }  // namespace implementation
+ }  // namespace subhal
+ }  // namespace V2_1
+diff --git a/sensors/v2/Sensor.h b/sensors/v2/Sensor.h
+index f6fe7a5..522d194 100644
+--- a/sensors/v2/Sensor.h
++++ b/sensors/v2/Sensor.h
+@@ -106,6 +106,7 @@ class SysfsPollingOneShotSensor : public OneShotSensor {
+     virtual void setOperationMode(OperationMode mode) override;
+     virtual std::vector<Event> readEvents() override;
+     virtual void fillEventData(Event& event);
++    virtual bool readFd(const int fd);
+ 
+   protected:
+     virtual void run() override;
+-- 
+2.25.1
+

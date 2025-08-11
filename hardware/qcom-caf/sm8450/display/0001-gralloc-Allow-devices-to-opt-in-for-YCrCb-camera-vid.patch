@@ -1,0 +1,69 @@
+From 20c0fb4d2d150418666e638505e04de21718d9d7 Mon Sep 17 00:00:00 2001
+From: Ivan Vecera <ivan@cera.cz>
+Date: Wed, 3 Jul 2024 11:40:30 +0200
+Subject: [PATCH] gralloc: Allow devices to opt-in for YCrCb camera video
+ encode
+
+DeviceAsWebcam is using USAGE_VIDEO_ENCODE [1] for buffers and
+this results in combined usage: (VIDEO_ENCODER | CAMERA_OUTPUT).
+
+On some Qcom devices (verified on pyxis (sdm710)) and maybe others
+DeviceAsWebcam has red & blue colors swapped with HAL_PIXEL_FORMAT_YCbCr_420_SP_VENUS.
+
+When using HAL_PIXEL_FORMAT_YCrCb_420_SP_VENUS the output from
+DeviceAsWebcam has correct colors.
+
+[1] https://android.googlesource.com/platform/packages/services/DeviceAsWebcam/+/d079a82ba4f773210c01d488d2dfa1d4d25be8e2
+
+Change-Id: I4376102e2b0eeaefed536eff29c315a71e469b57
+---
+ Android.bp           |  4 ++++
+ gralloc/gr_utils.cpp | 10 +++++++++-
+ 2 files changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/Android.bp b/Android.bp
+index 21e66a0c..1d103583 100644
+--- a/Android.bp
++++ b/Android.bp
+@@ -9,6 +9,7 @@ soong_config_module_type {
+         "gralloc4",
+         "default",
+         "var3",
++        "use_ycrcb_camera_encode",
+     ],
+     properties: [
+         "cflags",
+@@ -103,6 +104,9 @@ qtidisplay_cc_defaults {
+                 enabled: true,
+             },
+         },
++        use_ycrcb_camera_encode: {
++            cflags: ["-DUSE_YCRCB_CAMERA_ENCODE"],
++        },
+     },
+ }
+ 
+diff --git a/gralloc/gr_utils.cpp b/gralloc/gr_utils.cpp
+index 24d78ebd..7b3e84ca 100644
+--- a/gralloc/gr_utils.cpp
++++ b/gralloc/gr_utils.cpp
+@@ -1646,7 +1646,15 @@ int GetImplDefinedFormat(uint64_t usage, int format) {
+       } else if (usage & GRALLOC_USAGE_PRIVATE_HEIF) {
+         gr_format = HAL_PIXEL_FORMAT_NV12_HEIF;
+       } else if (format == HAL_PIXEL_FORMAT_YCbCr_420_888) {
+-        gr_format = HAL_PIXEL_FORMAT_YCbCr_420_SP_VENUS;
++#ifdef USE_YCRCB_CAMERA_ENCODE
++        if (usage & BufferUsage::CAMERA_OUTPUT) {
++          gr_format = HAL_PIXEL_FORMAT_YCrCb_420_SP_VENUS;
++        } else {
++          gr_format = HAL_PIXEL_FORMAT_YCbCr_420_SP_VENUS;
++        }
++#else
++       gr_format = HAL_PIXEL_FORMAT_YCbCr_420_SP_VENUS;
++#endif
+       } else {
+         gr_format = HAL_PIXEL_FORMAT_NV12_ENCODEABLE;  // NV12
+       }
+-- 
+2.25.1
+
